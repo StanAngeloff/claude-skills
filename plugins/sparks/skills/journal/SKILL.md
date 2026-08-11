@@ -1,6 +1,6 @@
 ---
 name: journal
-description: Activate session journaling for long-running, multi-session projects. Use when the user says "journal", "start journaling", "read the journal", "update the journal", "checkpoint", "vacuum the journal", or at the start of any session where a journal.md already exists in the project. This skill manages the full lifecycle — initialization, orientation, mid-session checkpoints, decision recording, journal vacuuming, pre-compaction preservation, and end-of-session handoff.
+description: Activate session journaling for long-running, multi-session projects. Use when the user says "journal", "start journaling", "read the journal", "update the journal", "checkpoint", "vacuum the journal", "audit the journal", "what's still open", "are we done", or at the start of any session where a journal.md already exists in the project. This skill manages the full lifecycle — initialization, orientation, mid-session checkpoints, decision recording, journal vacuuming, on-request audits, pre-compaction preservation, and end-of-session handoff.
 ---
 
 # Session Journal
@@ -31,6 +31,7 @@ When the skill is invoked, determine which phase applies:
 - **Journal exists, start of session** → Orient (section 2)
 - **Journal exists, mid-session** → Checkpoint (section 3)
 - **Live Session Log past its budget** → Vacuum (section 5)
+- **User asks what's still open or whether the work is done** → Audit (section 6)
 
 ### 1. Initialize (no journal exists yet)
 
@@ -215,7 +216,18 @@ The live journal must stay loadable in one read. Past **~500 lines of Session Lo
 
 A dense single day blows the budget as readily as a long-running effort, which is why the trigger is size, not elapsed time or phase. When work is genuinely enumerable upfront, the ordered step list lives in Current State under Outstanding, or in a companion document (rule 5) when it needs room — the journal itself grows and vacuums the same way either way.
 
-### 6. Pre-Compaction (mid-session, context filling up)
+### 6. Audit (on request)
+
+When the user asks whether the work is done, what is still open or deferred, or whether anything was dropped — deliver this audit. It is an on-request operation only: never run or offer it unprompted.
+
+The ledger is the thing under audit, so verdicts come from the entries. Deferrals are born inside session entries and only summarized in Current State; a build-heavy stretch drifts the summary first, and vacuuming takes old entries out of casual view. Certainty requires going back to the frozen record.
+
+1. **Read everything**: `journal.md` end to end, every `archive/` file, every companion document, and `git log` since the journal's start date to catch closures no entry recorded. This is the one operation where the full read is the point. Archives can go to parallel subagent readers when large, with verdicts kept in the main session.
+2. **Extract every open loop from the entries, not the ledger**: Deferred subsections, decisions awaiting a call, "waiting on" items and their owners, promised follow-ups, delegations to people or tickets, struck items whose correction implies replacement work.
+3. **Verdict each with provenance**: CLOSED (cite the closing entry, commit, PR or ticket), OPEN-ON-LEDGER (present under Outstanding), OPEN-MISSING (open but absent from the ledger), DELEGATED-NO-LANDING (handed off with no evidence the receiving side has it).
+4. **Report the delta, then repair**: deliver what is missing from the ledger, what the ledger lists that is actually closed, and every delegation without a landing site — quoting the originating entry for each, never a blanket all-clear. Then fold the confirmed verdicts into Current State as standing maintenance, and leave anything unprovable flagged for the user's call.
+
+### 7. Pre-Compaction (mid-session, context filling up)
 
 This is a mid-stream event — we're still working, but context is running low.
 
@@ -261,7 +273,7 @@ FIRST TASK: <what to pick up>
 
 Compaction is not a session boundary: the resumed conversation continues the same Session N, and "(closing)" stays reserved for a true end of session.
 
-### 7. End-of-Session Close
+### 8. End-of-Session Close
 
 When the user is done for the day — work is committed, the branch is clean, and they're shutting down. The next session will be a fresh start (new day, new agent, no shared context). The journal IS the handoff — no ephemeral prompts are needed.
 
@@ -292,7 +304,7 @@ Write a closing journal entry that contains everything a brand-new session needs
 
 A close-out entry is also required whenever the work changes state — merged, parked, reversed, superseded — no matter what kind of session lands it. Endgame sessions (review, CI, merge) are exactly where entries get skipped and journals freeze before the finale. The cheap form is fine — a one-line Status plus a Current State refresh beats a missing entry.
 
-### 8. Side Quests
+### 9. Side Quests
 
 For tangential work that isn't part of the main task:
 
@@ -301,7 +313,7 @@ For tangential work that isn't part of the main task:
 - Do **not** number it as part of the main line of work
 - Link back to the main work: "Returning to the main thread after this tangent"
 
-### 9. Worktrees
+### 10. Worktrees
 
 The journal stays in the main checkout — `docs/` is typically gitignored, so journal files do not travel with branches or worktrees. When work moves into a git worktree, link the journal into it as part of worktree setup:
 
@@ -314,7 +326,7 @@ One directory on disk, reachable from both paths: sessions inside the worktree r
 
 Never copy journal files into a worktree — copies fork the record. If a write-isolation guard still refuses the linked path, exit the worktree, checkpoint from the root, and re-enter; the link makes that round trip the exception rather than the routine.
 
-### 10. Branch Cleanup (Pre-Merge)
+### 11. Branch Cleanup (Pre-Merge)
 
 Before merging a feature branch back to the base branch, the journal files are removed from the tree. This is always the last step:
 
