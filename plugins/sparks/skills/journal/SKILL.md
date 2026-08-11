@@ -315,16 +315,18 @@ For tangential work that isn't part of the main task:
 
 ### 10. Worktrees
 
-The journal stays in the main checkout — `docs/` is typically gitignored, so journal files do not travel with branches or worktrees. When work moves into a git worktree, link the journal into it as part of worktree setup:
+The journal never lives inside a worktree: worktree removal would take it along, and journal files are gitignored, so removal safety checks never notice them. Its real home is either the main checkout's `docs/journals/<feature>` or, when the project's conventions name one, a journal directory outside every checkout — check the journal's own Working Notes and the project's kickoff skill. The external home is the stronger arrangement wherever sessions run under a write-isolation guard, because it stays writable from everywhere.
+
+When work moves into a git worktree, link the journal into it as part of worktree setup:
 
 ```bash
 mkdir -p <worktree>/docs/journals
 ln -s <main-checkout>/docs/journals/<feature> <worktree>/docs/journals/<feature>
 ```
 
-One directory on disk, reachable from both paths: sessions inside the worktree read and checkpoint through the link and nothing diverges. Without the link, every checkpoint from an isolated worktree session costs an exit/re-enter round trip. Linking the whole `docs/journals/` directory works the same way when several efforts share the worktree.
+The link is for reading: orientation and re-reads work from the worktree cwd through any link shape. Checkpoint writes go to the journal's real path directly — a write-isolation guard judges a write by where it lands and refuses worktree-side links that lead out of the worktree, whatever their target. When the real path itself is refused because the journal is resident in the guarded main checkout, exit the worktree, checkpoint from the root, and re-enter.
 
-Never copy journal files into a worktree — copies fork the record. If a write-isolation guard still refuses the linked path, exit the worktree, checkpoint from the root, and re-enter; the link makes that round trip the exception rather than the routine.
+Never copy journal files into a worktree and never hardlink them: a copy forks the record immediately, a hardlink forks it on the first rename-style write. One real directory, reached by symlink for reads and by its own path for writes, is what keeps the record single.
 
 ### 11. Branch Cleanup (Pre-Merge)
 
