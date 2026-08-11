@@ -124,41 +124,13 @@ This project is a collaboration. Every decision, direction, and plan is made tog
 <Append-only. New entries go at the bottom. Never edit previous entries — record corrections as new entries.>
 ```
 
-#### Recommended Sequence (extreme cases only)
-
-For sweeping, multi-week refactors that touch most of the codebase — the kind of work that spans multiple sprints and dozens of sessions — a separate `journal-recommended-sequence.md` may be warranted. **Do not create this by default.** Only propose it when:
-
-- The change is so large that the journal's session log alone cannot keep the agent oriented in the noise
-- There is a known, ordered sequence of steps that must be followed across many sessions
-- Acceptance criteria for the overall effort need a single place to live
-
-The sequence document is a **high-level roadmap**: where we are headed, what the acceptance criteria are at the end, and how we get there step by step. It is not a task list — it's a compass. The journal tracks what happened; the sequence tracks where we're going. Link them to each other.
-
-When a sequence document exists, sessions should cross-reference it to mark steps as done, struck (moot), or reframed — but the sequence is the user's decision to create, not something the agent proposes lightly.
-
-**Splitting journals by phase/step:** When a sequence document exists and the work spans many sessions, the journal can be split into multiple files — one per major phase or step of the sequence. This prevents any single file from growing unwieldy:
-
-```
-docs/journals/billing-rebuild/
-├── journal.md                         ← header sections only (principles, ubiquitous language, how we work together)
-├── journal-recommended-sequence.md    ← the compass
-├── journal-step-1.2-design.md         ← session log for step 1.2
-├── journal-step-1.3-design.md         ← session log for step 1.3
-└── journal-step-3.1.md                ← session log for step 3.1
-```
-
-In this structure, `journal.md` retains the evergreen header sections (How We Work Together, Ubiquitous Language, Founding Principles, Working Notes, Current State) and links to the per-step journals. Each step journal contains only its own session log entries. The sequence document tells you which step journal to read for orientation. New entries go to the current step's file, never back into `journal.md` — otherwise the split only relabels history and the main file regrows.
-
-For everything short of this, size is handled by the standing Vacuum step (section 5), not by per-step files.
-
 ### 2. Orient (journal exists, new session)
 
 This is the most critical phase. Before writing any code:
 
-1. **Read the header and Current State first.** Use `grep '^## \|^### ' journal.md` to map the structure, then size the read to the file. Under ~400 lines, read the journal end-to-end — don't skip sections; a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. Past that size, the default orientation read is the header sections, Current State, and the most recent session's entries; open older entries, archives, or companions only where Current State, the task, or a "Read further" trigger points. A full read of everything is the deliberate exception — name its cost before starting one; on a long-lived journal it dominates the session's token budget and can exceed what a file-read tool returns at all. If the journal has been split into per-step files, read `journal.md` in full, then the step journal indicated by the sequence document or the most recent entry's "Next" pointer.
+1. **Read the header and Current State first.** Use `grep '^## \|^### ' journal.md` to map the structure, then size the read to the file. Under ~400 lines, read the journal end-to-end — don't skip sections; a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. Past that size, the default orientation read is the header sections, Current State, and the most recent session's entries; open older entries, archives, or companions only where Current State, the task, or a "Read further" trigger points. A full read of everything is the deliberate exception — name its cost before starting one; on a long-lived journal it dominates the session's token budget and can exceed what a file-read tool returns at all.
 
 2. **Read companion documents** if they exist:
-   - `journal-recommended-sequence.md` — only exists for sweeping multi-week refactors; if present, skim for current step and what's struck/reframed
    - Any linked design docs or specs referenced in the journal
    - `archive/` files are history moved out by vacuuming, not orientation reading — open one only when the index or the task points into it
 
@@ -237,11 +209,11 @@ For architectural or foundational decisions that affect the whole project, also 
 The live journal must stay loadable in one read. Past **~500 lines of Session Log or ~100KB of file**, vacuum at the next natural breakpoint. Authorization is standing (agreed at initialization under How We Work Together): do not queue a question behind it, announce it in one line afterwards — a mid-flow question stalls while the file keeps growing.
 
 1. **Refresh Current State first**, promoting still-load-bearing Key Patterns and open items out of the entries about to move.
-2. **Move whole closed sessions verbatim** into `archive/sessions-NN-MM.md` — everything except the running session and the most recent closed one. Archives are frozen once written: never edited, never required orientation reading.
+2. **Move whole closed sessions verbatim** into `archive/sessions-NN-MM.md`, or `archive/<phase>.md` when the moved sessions form a recognizable phase — everything except the running session and the most recent closed one. Archives are frozen once written: never edited, never required orientation reading.
 3. **Maintain an index table in the main journal**: archive file → sessions → dates → one-line topics. Later entries cite archived material through it, and orientation uses it to decide whether an archive is worth opening.
 4. **The trigger re-arms.** Vacuum again every time the live log regrows past the budget — a one-shot split only resets the clock.
 
-A dense single day blows the budget as readily as a long-running effort, which is why the trigger is size, not elapsed time or phase. For sequence-driven mega-efforts with per-step files, entries move to the current step file instead of an archive — but the budget and the re-arming apply unchanged to whichever file receives new entries.
+A dense single day blows the budget as readily as a long-running effort, which is why the trigger is size, not elapsed time or phase. When work is genuinely enumerable upfront, the ordered step list lives in Current State under Outstanding, or in a companion document (rule 5) when it needs room — the journal itself grows and vacuums the same way either way.
 
 ### 6. Pre-Compaction (mid-session, context filling up)
 
@@ -251,7 +223,7 @@ This is a mid-stream event — we're still working, but context is running low.
 
 Generate **two ephemeral prompts** for the user:
 
-**Prompt 1 — for `/compact`:** Tells the compaction engine what to preserve. This is based on what the agent anticipates doing next — the plan we've laid out, the next step in the sequence, or what the user has indicated:
+**Prompt 1 — for `/compact`:** Tells the compaction engine what to preserve. This is based on what the agent anticipates doing next — the plan we've laid out, the next Outstanding item in Current State, or what the user has indicated:
 
 ```
 Preserve context for continuing <next task description>. Key items:
@@ -272,8 +244,7 @@ Read canonical sources first, then we work.
 STEP 0 — ORIENTATION READS (in order):
 1. `<path/to/journal.md>` — header + Current State + the latest session's entries; full read only if the file is small or this prompt says so.
 2. `git log --oneline -15` on current branch.
-3. <if sequence doc exists:> `journal-recommended-sequence.md` — focus on Steps X, Y, Z.
-4. <if other linked docs:> list them with what to focus on.
+3. <if other linked docs:> list them with what to focus on.
 
 CURRENT BRANCH STATE (for orientation, not as source of truth):
 - Branch: <branch-name> (N commits ahead of <base>)
@@ -327,8 +298,8 @@ For tangential work that isn't part of the main task:
 
 - Keep the entry brief — a few sentences, not a full checkpoint
 - Label it clearly as a side quest or tangent
-- Do **not** invent step numbers from the main sequence
-- Link back to the main work: "Returning to Step N after this tangent"
+- Do **not** number it as part of the main line of work
+- Link back to the main work: "Returning to the main thread after this tangent"
 
 ### 9. Worktrees
 
@@ -407,8 +378,8 @@ An effort does not need a ticket to deserve a journal: skill-building, investiga
 
 2. **Journal is separate from living documentation.** Living docs (design specs, API docs) reflect the codebase AS-IS today. The journal reflects WHAT HAPPENED and WHY. Don't conflate them.
 3. **The journal must stay accurate.** Strikethrough applies to decisions, reasoning, and narrative — the thinking trail. But mechanical references (renamed tables, moved files, changed function signatures) are different — leaving a stale file path in the journal doesn't preserve useful history, it creates traps. Fix these in place with a sed pass and note the update in the session log ("Updated stale references: renamed X to Y across journal").
-4. **Don't let the live journal outgrow a single read.** Vacuuming (section 5) is standing, pre-authorized maintenance: past the budget, do it at the next natural breakpoint and say so — don't queue a question. Current State and the archive index are the deliberate exceptions to rule 1: rewrite those in place and let the log carry the history. The per-step split stays reserved for sequence-driven mega-efforts.
-5. **Companion documents are linked, not inlined.** Design specs, sequence docs, and investigation notes live in their own files. The journal links to them and records the decisions that came out of them.
+4. **Don't let the live journal outgrow a single read.** Vacuuming (section 5) is standing, pre-authorized maintenance: past the budget, do it at the next natural breakpoint and say so — don't queue a question. Current State and the archive index are the deliberate exceptions to rule 1: rewrite those in place and let the log carry the history.
+5. **Companion documents are linked, not inlined.** Design specs, roadmaps, and investigation notes live in their own files. The journal links to them and records the decisions that came out of them.
 6. **Every journal entry should be self-contained enough that a reader skimming just that entry understands what happened.** Don't write "continued from above" — restate enough context.
 
 ---
@@ -421,7 +392,7 @@ For large projects with multiple concurrent workstreams, organize journals under
 docs/journals/
 ├── billing-rebuild/
 │   ├── journal.md
-│   └── journal-recommended-sequence.md   ← only for sweeping multi-week refactors
+│   └── archive/                          ← appears once vacuuming starts
 ├── api-migration/
 │   └── journal.md
 └── auth-overhaul/
@@ -430,4 +401,4 @@ docs/journals/
 
 Each journal is self-contained with its own header, principles, and session log. Cross-reference between journals when work in one affects another.
 
-Most features will have only `journal.md`. The sequence document is the exception, not the norm — reserved for when you know upfront that the work will span weeks and touch most of the codebase.
+Most features will have only `journal.md`, gaining an `archive/` once vacuuming starts and companion documents as the work warrants.
