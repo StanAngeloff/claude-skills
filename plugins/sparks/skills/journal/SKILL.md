@@ -1,13 +1,13 @@
 ---
 name: journal
-description: Activate session journaling for long-running, multi-session projects. Use when the user says "journal", "start journaling", "read the journal", "update the journal", "checkpoint", or at the start of any session where a journal.md already exists in the project. This skill manages the full lifecycle — initialization, orientation, mid-session checkpoints, decision recording, pre-compaction preservation, and end-of-session handoff.
+description: Activate session journaling for long-running, multi-session projects. Use when the user says "journal", "start journaling", "read the journal", "update the journal", "checkpoint", "vacuum the journal", or at the start of any session where a journal.md already exists in the project. This skill manages the full lifecycle — initialization, orientation, mid-session checkpoints, decision recording, journal vacuuming, pre-compaction preservation, and end-of-session handoff.
 ---
 
 # Session Journal
 
 ## What this is
 
-A shared, append-only project journal that serves as the **only persistent memory** between sessions. Without it, every new session starts blind. The journal captures decisions, discoveries, dead ends, and context that cannot be derived from code or git history alone.
+A shared project journal that is the **single home for the work's state** between sessions. Without it, every new session starts blind. The journal captures decisions, discoveries, dead ends, and context that cannot be derived from code or git history alone. Where the harness also keeps a persistent auto-memory, memory points at the journal — it never mirrors it (see "Where State Lives").
 
 It is not a transcript. It is not a changelog. It is a curated record of **why** things happened, written so that a future session — with zero prior context — can orient itself and continue the work.
 
@@ -17,7 +17,7 @@ It is not a transcript. It is not a changelog. It is a curated record of **why**
 
 ## The Golden Rule
 
-> The journal is our only long-running memory. Without making changes there, we are absolutely blind going into the next session.
+> The journal is the only long-running memory of the work. Without making changes there, we are absolutely blind going into the next session.
 
 Update the journal at every natural breakpoint — not batched at the end. If a decision was made, a problem was hit, or direction changed, it goes in the journal **now**.
 
@@ -30,6 +30,7 @@ When the skill is invoked, determine which phase applies:
 - **No journal exists** → Initialize (section 1)
 - **Journal exists, start of session** → Orient (section 2)
 - **Journal exists, mid-session** → Checkpoint (section 3)
+- **Live Session Log past its budget** → Vacuum (section 5)
 
 ### 1. Initialize (no journal exists yet)
 
@@ -58,7 +59,7 @@ Then write the journal with these sections in order:
 To resume in a new session:
 
 1. Activate the `/journal` skill — it governs how we work with this document
-2. Read this journal end-to-end before touching code
+2. Orient from this journal: header + Current State + the latest session by default, end-to-end only while the file is small
 3. Check `git log --oneline -15` for recent commits
 4. Read any companion documents linked below
 
@@ -78,6 +79,7 @@ This project is a collaboration. Every decision, direction, and plan is made tog
 2. **Ask, don't assume.** When uncertain about direction, scope, priority, or approach — ask. The cost of a question is near zero.
 3. **Show work incrementally.** After completing each discrete piece of work, stop and show it for review before moving on.
 4. **The journal records what we agreed, not what one side decided.** Every entry should reflect a conversation, not a unilateral conclusion.
+5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. Everything above needs discussion; the upkeep of this file does not.
 
 ---
 
@@ -100,6 +102,20 @@ This project is a collaboration. Every decision, direction, and plan is made tog
 ## Working Notes
 
 <Practical tips for sessions: local DB access, sandbox workarounds, test commands, environment quirks. Keep this section up to date.>
+
+---
+
+## Current State
+
+<Rewritten in place at every checkpoint — never appended, budget ~150 lines. Together with the sections above this is the default orientation read, so it must always answer: where the work stands, what is outstanding, and which entries, companions, or archives are worth opening for more. Closed items are deleted here — their history lives in the Session Log.>
+
+**Standing:** <2-5 present-tense sentences: what is built, what is in review, what is blocked>
+
+**Outstanding:** <numbered list of open items, each with an owner>
+
+**Key patterns:** <only the facts a session must re-read before touching the areas they concern>
+
+**Read further:** <companions and archives, each with a one-line "open when ..." trigger — omit until any exist>
 
 ---
 
@@ -131,17 +147,20 @@ docs/journals/billing-rebuild/
 └── journal-step-3.1.md                ← session log for step 3.1
 ```
 
-In this structure, `journal.md` retains the evergreen header sections (How We Work Together, Ubiquitous Language, Founding Principles, Working Notes) and links to the per-step journals. Each step journal contains only its own session log entries. The sequence document tells you which step journal to read for orientation.
+In this structure, `journal.md` retains the evergreen header sections (How We Work Together, Ubiquitous Language, Founding Principles, Working Notes, Current State) and links to the per-step journals. Each step journal contains only its own session log entries. The sequence document tells you which step journal to read for orientation. New entries go to the current step's file, never back into `journal.md` — otherwise the split only relabels history and the main file regrows.
+
+For everything short of this, size is handled by the standing Vacuum step (section 5), not by per-step files.
 
 ### 2. Orient (journal exists, new session)
 
 This is the most critical phase. Before writing any code:
 
-1. **Read the journal in full.** Use `grep '^## \|^### ' journal.md` first to understand the document's structure, then read it end-to-end. Don't skip sections — a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. If the journal has been split into per-step files, read `journal.md` (the header) in full, then read the step journal indicated by the sequence document or the most recent entry's "Next" pointer.
+1. **Read the header and Current State first.** Use `grep '^## \|^### ' journal.md` to map the structure, then size the read to the file. Under ~400 lines, read the journal end-to-end — don't skip sections; a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. Past that size, the default orientation read is the header sections, Current State, and the most recent session's entries; open older entries, archives, or companions only where Current State, the task, or a "Read further" trigger points. A full read of everything is the deliberate exception — name its cost before starting one; on a long-lived journal it dominates the session's token budget and can exceed what a file-read tool returns at all. If the journal has been split into per-step files, read `journal.md` in full, then the step journal indicated by the sequence document or the most recent entry's "Next" pointer.
 
 2. **Read companion documents** if they exist:
    - `journal-recommended-sequence.md` — only exists for sweeping multi-week refactors; if present, skim for current step and what's struck/reframed
    - Any linked design docs or specs referenced in the journal
+   - `archive/` files are history moved out by vacuuming, not orientation reading — open one only when the index or the task points into it
 
 3. **Check recent git history and cross-reference:**
 
@@ -155,7 +174,7 @@ This is the most critical phase. Before writing any code:
 
 5. **Note HANDS OFF items.** If the journal or opening prompt marks certain files, tasks, or areas as off-limits ("I'm handling those in a separate session"), respect these boundaries for the entire session.
 
-6. **Summarize your orientation** to the user in 3-5 sentences: what you understand the current state to be, what was deferred, and what seems like the natural next step. Then **ask** what they'd like to work on — do not assume.
+6. **Summarize your orientation** to the user in 3-5 sentences: what you understand the current state to be, what was deferred, and what seems like the natural next step. If the opening prompt already pinned the first task, start it; otherwise **ask** what they'd like to work on — do not assume.
 
 ### 3. Mid-Session Checkpoints
 
@@ -168,7 +187,7 @@ Append a checkpoint entry at natural breakpoints:
 - Before switching to a different area of work
 - An inflection point — the kind of moment where you'd say "this changes things"
 
-**Session numbering:** determine the session number by counting existing session entries in the journal. If this is the first entry, it's Session 1. Checkpoint numbering (K) resets per session.
+**Session numbering:** the next number after the most recent session entry — check the archive index too right after a vacuum. If this is the first entry, it's Session 1. A session ends at a handoff (end of day, or the user handing the work off), **not** at compaction: mid-session compaction continues the same session and its checkpoint numbering. Checkpoint numbering (K) resets per session.
 
 **Checkpoint format** (include only the sub-sections that have content — omit empty ones):
 
@@ -197,7 +216,9 @@ Write for a future reader with zero context.>
 - <anything punted, with enough context to pick it up later>
 ```
 
-After writing a checkpoint, review the last 2-5 commits (`git log --oneline -5`) and verify they're all reflected. If any are missing, add them to the entry before moving on.
+**Before appending, read the log's tail.** If the last entry is one this session didn't write, or the Session/Checkpoint number is already taken, take the next free number and say so in the entry. Parallel sessions on one journal are normal; silent numbering collisions are not — a duplicate header costs a manual reconciliation entry later.
+
+After writing a checkpoint, review the last 2-5 commits (`git log --oneline -5`) and verify they're all reflected. If any are missing, add them to the entry before moving on. Then refresh Current State so the two never disagree. A checkpoint is complete without any write to auto-memory — see "Where State Lives".
 
 Do **not** add timestamps to individual items unless the user specifically asks for them.
 
@@ -211,7 +232,18 @@ When a decision is made during discussion:
 
 For architectural or foundational decisions that affect the whole project, also consider whether they belong in the "Founding Principles" section at the top.
 
-### 5. Pre-Compaction (mid-session, context filling up)
+### 5. Vacuum (pre-authorized size maintenance)
+
+The live journal must stay loadable in one read. Past **~500 lines of Session Log or ~100KB of file**, vacuum at the next natural breakpoint. Authorization is standing (agreed at initialization under How We Work Together): do not queue a question behind it, announce it in one line afterwards — a mid-flow question stalls while the file keeps growing.
+
+1. **Refresh Current State first**, promoting still-load-bearing Key Patterns and open items out of the entries about to move.
+2. **Move whole closed sessions verbatim** into `archive/sessions-NN-MM.md` — everything except the running session and the most recent closed one. Archives are frozen once written: never edited, never required orientation reading.
+3. **Maintain an index table in the main journal**: archive file → sessions → dates → one-line topics. Later entries cite archived material through it, and orientation uses it to decide whether an archive is worth opening.
+4. **The trigger re-arms.** Vacuum again every time the live log regrows past the budget — a one-shot split only resets the clock.
+
+A dense single day blows the budget as readily as a long-running effort, which is why the trigger is size, not elapsed time or phase. For sequence-driven mega-efforts with per-step files, entries move to the current step file instead of an archive — but the budget and the re-arming apply unchanged to whichever file receives new entries.
+
+### 6. Pre-Compaction (mid-session, context filling up)
 
 This is a mid-stream event — we're still working, but context is running low.
 
@@ -238,7 +270,7 @@ New session on <branch> (base: <base-branch>). You have no prior context.
 Read canonical sources first, then we work.
 
 STEP 0 — ORIENTATION READS (in order):
-1. `<path/to/journal.md>` — read in full (overview, "How We Work Together", ubiquitous language, founding principles, session log).
+1. `<path/to/journal.md>` — header + Current State + the latest session's entries; full read only if the file is small or this prompt says so.
 2. `git log --oneline -15` on current branch.
 3. <if sequence doc exists:> `journal-recommended-sequence.md` — focus on Steps X, Y, Z.
 4. <if other linked docs:> list them with what to focus on.
@@ -256,7 +288,9 @@ KEY PATTERN: <if applicable — critical architectural knowledge that must be re
 FIRST TASK: <what to pick up>
 ```
 
-### 6. End-of-Session Close
+Compaction is not a session boundary: the resumed conversation continues the same Session N, and "(closing)" stays reserved for a true end of session.
+
+### 7. End-of-Session Close
 
 When the user is done for the day — work is committed, the branch is clean, and they're shutting down. The next session will be a fresh start (new day, new agent, no shared context). The journal IS the handoff — no ephemeral prompts are needed.
 
@@ -285,7 +319,9 @@ Write a closing journal entry that contains everything a brand-new session needs
 <A paragraph of narrative context that a fresh session needs. Include gotchas, things that almost went wrong, non-obvious state that the codebase doesn't make clear. Write this so that tomorrow's agent — pointed at the journal with "where do we stand?" — has everything it needs.>
 ```
 
-### 7. Side Quests
+A close-out entry is also required whenever the work changes state — merged, parked, reversed, superseded — no matter what kind of session lands it. Endgame sessions (review, CI, merge) are exactly where entries get skipped and journals freeze before the finale. The cheap form is fine — a one-line Status plus a Current State refresh beats a missing entry.
+
+### 8. Side Quests
 
 For tangential work that isn't part of the main task:
 
@@ -294,7 +330,20 @@ For tangential work that isn't part of the main task:
 - Do **not** invent step numbers from the main sequence
 - Link back to the main work: "Returning to Step N after this tangent"
 
-### 8. Branch Cleanup (Pre-Merge)
+### 9. Worktrees
+
+The journal stays in the main checkout — `docs/` is typically gitignored, so journal files do not travel with branches or worktrees. When work moves into a git worktree, link the journal into it as part of worktree setup:
+
+```bash
+mkdir -p <worktree>/docs/journals
+ln -s <main-checkout>/docs/journals/<feature> <worktree>/docs/journals/<feature>
+```
+
+One directory on disk, reachable from both paths: sessions inside the worktree read and checkpoint through the link and nothing diverges. Without the link, every checkpoint from an isolated worktree session costs an exit/re-enter round trip. Linking the whole `docs/journals/` directory works the same way when several efforts share the worktree.
+
+Never copy journal files into a worktree — copies fork the record. If a write-isolation guard still refuses the linked path, exit the worktree, checkpoint from the root, and re-enter; the link makes that round trip the exception rather than the routine.
+
+### 10. Branch Cleanup (Pre-Merge)
 
 Before merging a feature branch back to the base branch, the journal files are removed from the tree. This is always the last step:
 
@@ -304,7 +353,7 @@ git rm --cached journal*.md
 git rm --cached docs/journals/<feature>/journal*.md
 ```
 
-Commit the removal. The journal content is preserved in git history but doesn't clutter the main branch.
+Commit the removal. The journal content is preserved in git history but doesn't clutter the main branch. If the journal directory is gitignored and was never tracked, there is nothing to remove and this step does not apply.
 
 ---
 
@@ -331,10 +380,22 @@ Commit the removal. The journal content is preserved in git history but doesn't 
 - **Copy-pasted error messages without context.** The error itself is noise — record what it _meant_ and what you did about it.
 - **Timestamps on every item.** Only timestamp when the user asks for it.
 - **Excessive detail on minor work.** The journal tracks top-level implementation. If an entry is getting too long, summarize in the journal and move detail to a linked document.
+- **Re-pasted ledgers.** Don't re-list the outstanding-items table in entries as items close — Current State holds the live list once; entries record only the delta.
+
+## Where State Lives
+
+The journal owns the work's state. When the harness also keeps a persistent auto-memory (memory files plus an index loaded into every session), the boundary is:
+
+- **The work's state** — status, decisions, open items, branch/PR facts — lives in the journal **only**. Never mirror it into memory files: a mirrored file goes stale within days, never gets read back for orientation, and costs a double write at every checkpoint — a pure tax while it lives and a trap for whoever finally reads it.
+- **The memory index carries one line per effort**: its name plus "READ <path-to-journal>". Refresh that line's few words at session close; it holds no state of its own. This line is load-bearing — it is how a fresh session discovers the journal exists — which is exactly why it must stay a pointer.
+- **Durable cross-project facts** — who the user is, standing feedback on how to work, reference knowledge that outlives any one effort — belong in auto-memory, not the journal. When session work produces one, record the promotion in the checkpoint ("promoted to memory: <name>") instead of duplicating its content in both places.
+- **Narrate every memory write in chat as it happens.** Silent memory writes are how shadow copies form and persist unnoticed.
+
+An effort does not need a ticket to deserve a journal: skill-building, investigations, and migrations get one under the same root. Without a journal, an initiative's state has nowhere durable to live except memory — and the shadow-copy problem returns by structural necessity.
 
 ## Rules
 
-1. **Entries are append-only and chronological.** Never delete or rewrite previous entries — the thinking trail matters. When something turns out to be wrong or no longer applies, use **strikethrough** (`~~...~~`) on the original text, add a brief inline correction with a date, and expand on the correction in a new entry further down. This preserves the visible record of how thinking evolved:
+1. **Session Log entries are append-only and chronological.** Never delete or rewrite previous entries — the thinking trail matters. When something turns out to be wrong or no longer applies, use **strikethrough** (`~~...~~`) on the original text, add a brief inline correction with a date, and expand on the correction in a new entry further down. This preserves the visible record of how thinking evolved:
 
    ```markdown
    ~~Step 4.2: Add per-region fallback routing to the ingestion pipeline.~~
@@ -346,7 +407,7 @@ Commit the removal. The journal content is preserved in git history but doesn't 
 
 2. **Journal is separate from living documentation.** Living docs (design specs, API docs) reflect the codebase AS-IS today. The journal reflects WHAT HAPPENED and WHY. Don't conflate them.
 3. **The journal must stay accurate.** Strikethrough applies to decisions, reasoning, and narrative — the thinking trail. But mechanical references (renamed tables, moved files, changed function signatures) are different — leaving a stale file path in the journal doesn't preserve useful history, it creates traps. Fix these in place with a sed pass and note the update in the session log ("Updated stale references: renamed X to Y across journal").
-4. **Don't let the journal get too long without structure.** If it exceeds ~500 lines, consider splitting. For sequence-driven projects, split by step/phase (one journal file per major step). For simpler projects, keep the header sections in the main journal and move older session entries to an archive file. Propose the split to the user — don't do it unilaterally.
+4. **Don't let the live journal outgrow a single read.** Vacuuming (section 5) is standing, pre-authorized maintenance: past the budget, do it at the next natural breakpoint and say so — don't queue a question. Current State and the archive index are the deliberate exceptions to rule 1: rewrite those in place and let the log carry the history. The per-step split stays reserved for sequence-driven mega-efforts.
 5. **Companion documents are linked, not inlined.** Design specs, sequence docs, and investigation notes live in their own files. The journal links to them and records the decisions that came out of them.
 6. **Every journal entry should be self-contained enough that a reader skimming just that entry understands what happened.** Don't write "continued from above" — restate enough context.
 
@@ -354,7 +415,7 @@ Commit the removal. The journal content is preserved in git history but doesn't 
 
 ## Multi-Journal Projects
 
-For large projects with multiple concurrent workstreams, organize journals under `docs/journals/<feature>/`:
+For large projects with multiple concurrent workstreams, organize journals under `docs/journals/<feature>/` — ticketed work and un-ticketed initiatives alike:
 
 ```
 docs/journals/
