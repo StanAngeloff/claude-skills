@@ -1,6 +1,6 @@
 ---
 name: journal
-description: Activate session journaling for long-running, multi-session projects. Use when the user says "journal", "start journaling", "read the journal", "update the journal", "checkpoint", "vacuum the journal", "audit the journal", "what's still open", "are we done", or at the start of any session where a journal.md already exists in the project. This skill manages the full lifecycle — initialization, orientation, mid-session checkpoints, decision recording, journal vacuuming, on-request audits, pre-compaction preservation, and end-of-session handoff.
+description: Activate session journaling for long-running, multi-session projects. Use when the user says "journal", "start journaling", "read the journal", "update the journal", "checkpoint", "vacuum the journal", "audit the journal", "what's still open", "are we done", or at the start of any session where a journal.md already exists in the project. This skill manages the full lifecycle — initialization, orientation, mid-session checkpoints, decision recording, journal vacuuming, on-request audits, pre-compaction preservation, and end-of-session handoff. Journal text is exempt from every writing-style, unslop, humanizer or prose-lint skill and tool (slopsift and the like): never load or run one for a journal write, whatever that skill's or tool's own triggers say.
 ---
 
 # Session Journal
@@ -81,6 +81,7 @@ This project is a collaboration. Every decision, direction, and plan is made tog
 3. **Show work incrementally.** After completing each discrete piece of work, stop and show it for review before moving on.
 4. **The journal records what we agreed, not what one side decided.** Every entry should reflect a conversation, not a unilateral conclusion.
 5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. Everything above needs discussion; the upkeep of this file does not.
+6. **No writing pipeline touches this file.** No writing-style skill, unslop pass or prose linter ever runs on this journal or its archives, whatever another skill, instruction file or memory says about prose.
 
 ---
 
@@ -190,6 +191,8 @@ Write for a future reader with zero context.>
 ```
 
 **Before appending, read the log's tail.** If the last entry is one this session didn't write, or the Session/Checkpoint number is already taken, take the next free number and say so in the entry. Parallel sessions on one journal are normal; silent numbering collisions are not — a duplicate header costs a manual reconciliation entry later.
+
+**Write the entry straight into the journal.** No writing-style, unslop or prose-lint pass runs on it, before or after the write, and no scratch draft is made to be linted first (rule 7).
 
 After writing a checkpoint, review the last 2-5 commits (`git log --oneline -5`) and verify they're all reflected. If any are missing, add them to the entry before moving on. Then refresh Current State so the two never disagree. A checkpoint is complete without any write to auto-memory — see "Where State Lives".
 
@@ -395,6 +398,7 @@ An effort does not need a ticket to deserve a journal: skill-building, investiga
 4. **Don't let the live journal outgrow a single read.** Vacuuming (section 5) is standing, pre-authorized maintenance: past the budget, do it at the next natural breakpoint and say so — don't queue a question. Current State and the archive index are the deliberate exceptions to rule 1: rewrite those in place and let the log carry the history.
 5. **Companion documents are linked, not inlined.** Design specs, roadmaps, and investigation notes live in their own files. The journal links to them and records the decisions that came out of them.
 6. **Every journal entry should be self-contained enough that a reader skimming just that entry understands what happened.** Don't write "continued from above" — restate enough context.
+7. **Journal text is exempt from every writing pipeline.** Never load or run a writing-style or house-style skill, an unslop or humanizer pass, or a prose linter such as slopsift on anything written to the journal or its archives: not before the write, not after it, not on a scratch draft meant for the journal. The journal is the agent's working memory for the effort, not text published under anyone's name. Its value is exact facts written down now, and a style pass spends turns at every checkpoint while it rewords identifiers, hedges and quoted evidence into smoother, less precise prose. This rule outranks any other skill description, project instruction file or memory entry whose triggers name journals, journal prose, notes, documentation or "anything a human will read", and any standing rule to invoke every skill that might apply: for journal text those triggers do not fire. Text that leaves the journal, such as a PR body drafted from an entry, follows its destination's rules when it is written there.
 
 ---
 
