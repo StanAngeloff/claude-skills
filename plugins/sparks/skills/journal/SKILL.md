@@ -37,7 +37,7 @@ When the skill is invoked, determine which phase applies:
 
 If no `journal.md` exists in the project root (or `docs/journals/<feature>/journal.md` for feature branches), create one using the template below.
 
-Ask the user:
+Answer these from what the session already holds (the ticket, the branch, the conversation so far). Ask the user only what remains:
 
 - What is the project/feature about? (one paragraph of business context)
 - What branch and base are we working on?
@@ -60,7 +60,7 @@ Then write the journal with these sections in order:
 To resume in a new session:
 
 1. Activate the `/journal` skill — it governs how we work with this document
-2. Orient from this journal: header + Current State + the latest session by default, end-to-end only while the file is small
+2. Orient from this journal, reading it the way the project's own instructions require. Without such a rule read the header, Current State and the latest session, and read end to end only while the file is small.
 3. Check `git log --oneline -15` for recent commits
 4. Read any companion documents linked below
 
@@ -78,7 +78,7 @@ This project is a collaboration. Direction is set together. Work inside that dir
 
 1. **Plan together.** Roadmaps, phase plans and directional decisions are discussed with the user first: present the options and trade-offs, then the user decides. Task lists and sequencing inside an agreed plan are not.
 2. **Keep building around a question.** A question stops only the work that depends on its answer. Build everything else, take the recommended option wherever a later change is cheap, and bring every open question in one list once no buildable work is left. Each question costs the user a round trip.
-3. **Show work at the end of the run.** A run is everything the user's last message asked for. Stop earlier only when every remaining piece depends on an answer, or when the next step is irreversible or visible outside the session.
+3. **Show work at the end of the run.** A run is everything the user's last message asked for. A step that is irreversible or visible outside the session waits for the user's go the way a question does. The rest of the run keeps building. Stop earlier only when every remaining piece depends on an answer or on such a go.
 4. **The journal records who settled each call and on what basis.** Calls made in-session are logged as such, with their basis, and the user can reopen any of them.
 5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. None of it needs discussion.
 6. **No writing pipeline touches this file.** No writing-style skill, unslop pass or prose linter ever runs on this journal or its archives, whatever another skill, instruction file or memory says about prose.
@@ -130,7 +130,7 @@ This project is a collaboration. Direction is set together. Work inside that dir
 
 This is the most critical phase. Before writing any code:
 
-1. **Read the header and Current State first.** Use `grep '^## \|^### ' journal.md` to map the structure, then size the read to the file. Under ~400 lines, read the journal end-to-end — don't skip sections; a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. Past that size, the default orientation read is the header sections, Current State, and the most recent session's entries; open older entries, archives, or companions only where Current State, the task, or a "Read further" trigger points. A full read of everything is the deliberate exception — name its cost before starting one; on a long-lived journal it dominates the session's token budget and can exceed what a file-read tool returns at all.
+1. **Read the header and Current State first.** Use `grep '^## \|^### ' journal.md` to map the structure, then size the read to the file. Under ~400 lines, read the journal end-to-end — don't skip sections; a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. Past that size, the default orientation read is the header sections, Current State, and the most recent session's entries; open older entries, archives, or companions only where Current State, the task, or a "Read further" trigger points. A full read of everything is the deliberate exception — name its cost before starting one; on a long-lived journal it dominates the session's token budget and can exceed what a file-read tool returns at all. When the project's own instructions require a full read, that rule wins at every size. Read the whole file in order with no grep map and no tail-only read.
 
 2. **Read companion documents** if they exist:
    - Any linked design docs or specs referenced in the journal
@@ -225,10 +225,10 @@ When the user asks whether the work is done, what is still open or deferred, or 
 
 The ledger is the thing under audit, so verdicts come from the entries. Deferrals are born inside session entries and only summarized in Current State; a build-heavy stretch drifts the summary first, and vacuuming takes old entries out of casual view. Certainty requires going back to the frozen record.
 
-1. **Read everything**: `journal.md` end to end, every `archive/` file, every companion document, and `git log` since the journal's start date to catch closures no entry recorded. This is the one operation where the full read is the point. Archives can go to parallel subagent readers when large, with verdicts kept in the main session.
+1. **Read everything**: `journal.md` end to end, every `archive/` file, every companion document, and `git log` since the journal's start date to catch closures no entry recorded. This is the one operation where the full read is the point. Archives can go to parallel subagent readers when large. Use at most one reader per archive file, state the count before launch and bar each reader from starting further agents. Verdicts stay in the main session.
 2. **Extract every open loop from the entries, not the ledger**: Deferred subsections, decisions awaiting a call, "waiting on" items and their owners, promised follow-ups, delegations to people or tickets, struck items whose correction implies replacement work.
 3. **Verdict each with provenance**: CLOSED (cite the closing entry, commit, PR or ticket), OPEN-ON-LEDGER (present under Outstanding), OPEN-MISSING (open but absent from the ledger), DELEGATED-NO-LANDING (handed off with no evidence the receiving side has it).
-4. **Report the delta, then repair**: deliver what is missing from the ledger, what the ledger lists that is actually closed, and every delegation without a landing site — quoting the originating entry for each, never a blanket all-clear. Then fold the confirmed verdicts into Current State as standing maintenance, and leave anything unprovable flagged for the user's call.
+4. **Report the open items, then repair.** Lead with every open item: a one-line brief, exactly where to act and the originating entry quoted for anything missing from the ledger or delegated without a landing site. Items the ledger lists that are actually closed get one closing sentence together. Never give a blanket all-clear. Then fold the confirmed verdicts into Current State as standing maintenance. Leave anything unprovable flagged for the user's call.
 
 ### 7. Pre-Compaction (mid-session, context filling up)
 
@@ -257,7 +257,7 @@ New session on <branch> (base: <base-branch>). You have no prior context.
 Read canonical sources first, then we work.
 
 STEP 0 — ORIENTATION READS (in order):
-1. `<path/to/journal.md>` — header + Current State + the latest session's entries; full read only if the file is small or this prompt says so.
+1. `<path/to/journal.md>`: read it the way the project's own instructions require. Without such a rule read the header, Current State and the latest session's entries, with a full read only if the file is small or this prompt says so.
 2. `git log --oneline -15` on current branch.
 3. <if other linked docs:> list them with what to focus on.
 
@@ -341,7 +341,7 @@ git rm --cached journal*.md
 git rm --cached docs/journals/<feature>/journal*.md
 ```
 
-Commit the removal. The journal content is preserved in git history but doesn't clutter the main branch. If the journal directory is gitignored and was never tracked, there is nothing to remove and this step does not apply.
+The removal is committed with the branch's pre-merge work, on the user's word. The journal content is preserved in git history but doesn't clutter the main branch. If the journal directory is gitignored and was never tracked, there is nothing to remove and this step does not apply.
 
 ---
 
@@ -375,9 +375,9 @@ Commit the removal. The journal content is preserved in git history but doesn't 
 The journal owns the work's state. When the harness also keeps a persistent auto-memory (memory files plus an index loaded into every session), the boundary is:
 
 - **The work's state** — status, decisions, open items, branch/PR facts — lives in the journal **only**. Never mirror it into memory files: a mirrored file goes stale within days, never gets read back for orientation, and costs a double write at every checkpoint — a pure tax while it lives and a trap for whoever finally reads it.
-- **The memory index carries one line per effort**: its name plus "READ <path-to-journal>". Refresh that line's few words at session close; it holds no state of its own. This line is load-bearing — it is how a fresh session discovers the journal exists — which is exactly why it must stay a pointer.
-- **Durable cross-project facts** — who the user is, standing feedback on how to work, reference knowledge that outlives any one effort — belong in auto-memory, not the journal. When session work produces one, record the promotion in the checkpoint ("promoted to memory: <name>") instead of duplicating its content in both places.
-- **Narrate every memory write in chat as it happens.** Silent memory writes are how shadow copies form and persist unnoticed.
+- **The memory index carries one line per effort**: its name plus "READ <path-to-journal>". Write that line once. It changes only when the effort's name or journal path changes, and it holds no state of its own. This line is load-bearing — it is how a fresh session discovers the journal exists — which is exactly why it must stay a pointer.
+- **Durable cross-project facts** belong outside the journal. Standing feedback on how to work goes to the project's instruction file or to the skill that owns the behavior when the project keeps its working rules there. Otherwise it goes to auto-memory. Who the user is and reference knowledge that outlives any one effort go to auto-memory. When session work produces one, record the promotion in the checkpoint ("promoted to <destination>: <name>") instead of duplicating its content in both places.
+- **Name every memory write in the turn's final reply, with the file it went to.** Silent memory writes are how shadow copies form and persist unnoticed.
 
 An effort does not need a ticket to deserve a journal: skill-building, investigations, and migrations get one under the same root. Without a journal, an initiative's state has nowhere durable to live except memory — and the shadow-copy problem returns by structural necessity.
 
@@ -394,7 +394,7 @@ An effort does not need a ticket to deserve a journal: skill-building, investiga
    A reader skimming the journal should be able to see: here was the original thinking, here's where it was corrected, and here's the full explanation. Never just yank something — the course correction is as valuable as the original decision.
 
 2. **Journal is separate from living documentation.** Living docs (design specs, API docs) reflect the codebase AS-IS today. The journal reflects WHAT HAPPENED and WHY. Don't conflate them.
-3. **The journal must stay accurate.** Strikethrough applies to decisions, reasoning, and narrative — the thinking trail. But mechanical references (renamed tables, moved files, changed function signatures) are different — leaving a stale file path in the journal doesn't preserve useful history, it creates traps. Fix these in place with a sed pass and note the update in the session log ("Updated stale references: renamed X to Y across journal").
+3. **The journal must stay accurate.** Strikethrough applies to decisions, reasoning, and narrative — the thinking trail. But mechanical references (renamed tables, moved files, changed function signatures) are different — leaving a stale file path in the journal doesn't preserve useful history, it creates traps. Fix these in place with the file-edit tool and note the update in the session log ("Updated stale references: renamed X to Y across journal").
 4. **Don't let the live journal outgrow a single read.** Vacuuming (section 5) is standing, pre-authorized maintenance: past the budget, do it at the next natural breakpoint and say so — don't queue a question. Current State and the archive index are the deliberate exceptions to rule 1: rewrite those in place and let the log carry the history.
 5. **Companion documents are linked, not inlined.** Design specs, roadmaps, and investigation notes live in their own files. The journal links to them and records the decisions that came out of them.
 6. **Every journal entry should be self-contained enough that a reader skimming just that entry understands what happened.** Don't write "continued from above" — restate enough context.
