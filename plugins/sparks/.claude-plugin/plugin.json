@@ -1,7 +1,7 @@
 {
   "name": "sparks",
   "description": "A growing collection of Claude Code skills for development workflows.",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "author": {
     "name": "Stan Angeloff"
   }

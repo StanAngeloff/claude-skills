@@ -74,13 +74,13 @@ To resume in a new session:
 
 ## How We Work Together
 
-This project is a collaboration. Every decision, direction, and plan is made together — never unilaterally.
+This project is a collaboration. Direction is set together. Work inside that direction runs without check-ins and reports at the end.
 
-1. **No solo planning.** Do not create roadmaps, phase plans, task lists, or directional decisions without discussing them with the user first. Present options, raise questions, surface trade-offs — then the user decides.
-2. **Ask, don't assume.** When uncertain about direction, scope, priority, or approach — ask. The cost of a question is near zero.
-3. **Show work incrementally.** After completing each discrete piece of work, stop and show it for review before moving on.
-4. **The journal records what we agreed, not what one side decided.** Every entry should reflect a conversation, not a unilateral conclusion.
-5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. Everything above needs discussion; the upkeep of this file does not.
+1. **Plan together.** Roadmaps, phase plans and directional decisions are discussed with the user first: present the options and trade-offs, then the user decides. Task lists and sequencing inside an agreed plan are not.
+2. **Keep building around a question.** A question stops only the work that depends on its answer. Build everything else, take the recommended option wherever a later change is cheap, and bring every open question in one list once no buildable work is left. Each question costs the user a round trip.
+3. **Show work at the end of the run.** A run is everything the user's last message asked for. Stop earlier only when every remaining piece depends on an answer, or when the next step is irreversible or visible outside the session.
+4. **The journal records who settled each call and on what basis.** Calls made in-session are logged as such, with their basis, and the user can reopen any of them.
+5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. None of it needs discussion.
 6. **No writing pipeline touches this file.** No writing-style skill, unslop pass or prose linter ever runs on this journal or its archives, whatever another skill, instruction file or memory says about prose.
 
 ---
@@ -148,7 +148,7 @@ This is the most critical phase. Before writing any code:
 
 5. **Note HANDS OFF items.** If the journal or opening prompt marks certain files, tasks, or areas as off-limits ("I'm handling those in a separate session"), respect these boundaries for the entire session.
 
-6. **Summarize your orientation** to the user in 3-5 sentences: what you understand the current state to be, what was deferred, and what seems like the natural next step. If the opening prompt already pinned the first task, start it; otherwise **ask** what they'd like to work on — do not assume.
+6. **Summarize your orientation** to the user in 3-5 sentences: what you understand the current state to be, what was deferred, and what seems like the natural next step. If the opening prompt or the journal's Session setup already pins the first task, start it; otherwise **ask** what they'd like to work on — do not assume.
 
 ### 3. Mid-Session Checkpoints
 
