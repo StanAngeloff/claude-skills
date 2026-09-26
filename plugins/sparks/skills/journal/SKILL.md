@@ -7,7 +7,7 @@ description: Activate session journaling for long-running, multi-session project
 
 ## What this is
 
-A shared project journal that is the **single home for the work's state** between sessions. Without it, every new session starts blind. The journal captures decisions, discoveries, dead ends, and context that cannot be derived from code or git history alone. Where the harness also keeps a persistent auto-memory, memory points at the journal — it never mirrors it (see "Where State Lives").
+A shared project journal that is the **single home for the work's state** between sessions. Without it, every new session starts blind. The journal captures decisions, discoveries, dead ends, and context that cannot be derived from code or git history alone. Where the harness also keeps a persistent auto-memory, memory points at the journal — it never mirrors it, and a learning reaches memory only through a promotion pass (see "Where State Lives").
 
 It is not a transcript. It is not a changelog. It is a curated record of **why** things happened, written so that a future session — with zero prior context — can orient itself and continue the work.
 
@@ -32,6 +32,7 @@ When the skill is invoked, determine which phase applies:
 - **Journal exists, mid-session** → Checkpoint (section 3)
 - **Live Session Log past its budget** → Vacuum (section 5)
 - **User asks what's still open or whether the work is done** → Audit (section 6)
+- **Work merged, parked or superseded** → Close-out with the promotion pass (section 8)
 
 ### 1. Initialize (no journal exists yet)
 
@@ -185,6 +186,10 @@ Write for a future reader with zero context.>
 
 - <critical architectural knowledge a future session must re-read before touching certain areas — e.g., "always check X before modifying Y">
 
+#### Learnings
+
+- <what doing the work taught, with its evidence: a tool or environment behavior, a technique that worked or failed, a correction from the user on how to work, a fact about the user. Record it here even when it plainly outlives this effort — here it waits for the promotion pass (see "Where State Lives")>
+
 #### Deferred
 
 - <anything punted, with enough context to pick it up later>
@@ -194,7 +199,7 @@ Write for a future reader with zero context.>
 
 **Write the entry straight into the journal.** No writing-style, unslop or prose-lint pass runs on it, before or after the write, and no scratch draft is made to be linted first (rule 7).
 
-After writing a checkpoint, review the last 2-5 commits (`git log --oneline -5`) and verify they're all reflected. If any are missing, add them to the entry before moving on. Then refresh Current State so the two never disagree. A checkpoint is complete without any write to auto-memory — see "Where State Lives".
+After writing a checkpoint, review the last 2-5 commits (`git log --oneline -5`) and verify they're all reflected. If any are missing, add them to the entry before moving on. Then refresh Current State so the two never disagree. A checkpoint is complete without any write to auto-memory, the project's instruction file or a skill: its Learnings wait in the journal for the promotion pass — see "Where State Lives".
 
 Do **not** add timestamps to individual items unless the user specifically asks for them.
 
@@ -295,6 +300,10 @@ Write a closing journal entry that contains everything a brand-new session needs
 
 - <what was punted with context>
 
+#### Learnings
+
+- <what doing the work taught this session, as in a checkpoint>
+
 #### Next
 
 - <what the next session should start with>
@@ -306,6 +315,8 @@ Write a closing journal entry that contains everything a brand-new session needs
 ```
 
 A close-out entry is also required whenever the work changes state — merged, parked, reversed, superseded — no matter what kind of session lands it. Endgame sessions (review, CI, merge) are exactly where entries get skipped and journals freeze before the finale. The cheap form is fine — a one-line Status plus a Current State refresh beats a missing entry.
+
+The close-out of merged, parked or superseded work also runs the promotion pass (see "Where State Lives") over every Learnings entry written after the last Promotion pass. When no such entry is left, a line in the close-out saying so is the whole pass.
 
 ### 9. Side Quests
 
@@ -347,19 +358,20 @@ The removal is committed with the branch's pre-merge work, on the user's word. T
 
 ## What to Record
 
-| Category                  | Examples                                               |
-| ------------------------- | ------------------------------------------------------ |
-| Decisions made            | "Chose X over Y because Z"                             |
-| Decisions deferred        | "Punted on X — needs Y first"                          |
-| Problems encountered      | "X didn't work because Y"                              |
-| Workarounds applied       | "Had to use X instead of Y due to Z"                   |
-| Design deviations         | "Design says X but we did Y because Z"                 |
-| Things that broke         | "X stopped working after Y"                            |
-| API/library surprises     | "API requires X before Y — not documented"             |
-| Reframings                | "We thought X but discovered Y — changes everything"   |
-| Course corrections        | Strike the original, date the correction, expand below |
-| Phase/milestone progress  | "Step N complete", "Phase M started"                   |
-| Working style corrections | "User wants X approach, not Y"                         |
+| Category                   | Examples                                                             |
+| -------------------------- | -------------------------------------------------------------------- |
+| Decisions made             | "Chose X over Y because Z"                                           |
+| Decisions deferred         | "Punted on X — needs Y first"                                        |
+| Problems encountered       | "X didn't work because Y"                                            |
+| Workarounds applied        | "Had to use X instead of Y due to Z"                                 |
+| Design deviations          | "Design says X but we did Y because Z"                               |
+| Things that broke          | "X stopped working after Y"                                          |
+| API/library surprises      | "API requires X before Y — not documented"                           |
+| Reframings                 | "We thought X but discovered Y — changes everything"                 |
+| Course corrections         | Strike the original, date the correction, expand below               |
+| Phase/milestone progress   | "Step N complete", "Phase M started"                                 |
+| Working style corrections  | "User wants X approach, not Y" (under Learnings)                     |
+| Tool and environment traps | "X reports success although Y failed: run Z first" (under Learnings) |
 
 ## What NOT to Record
 
@@ -376,7 +388,16 @@ The journal owns the work's state. When the harness also keeps a persistent auto
 
 - **The work's state** — status, decisions, open items, branch/PR facts — lives in the journal **only**. Never mirror it into memory files: a mirrored file goes stale within days, never gets read back for orientation, and costs a double write at every checkpoint — a pure tax while it lives and a trap for whoever finally reads it.
 - **The memory index carries one line per effort**: its name plus "READ <path-to-journal>". Write that line once. It changes only when the effort's name or journal path changes, and it holds no state of its own. This line is load-bearing — it is how a fresh session discovers the journal exists — which is exactly why it must stay a pointer.
-- **Durable cross-project facts** belong outside the journal. Standing feedback on how to work goes to the project's instruction file or to the skill that owns the behavior when the project keeps its working rules there. Otherwise it goes to auto-memory. Who the user is and reference knowledge that outlives any one effort go to auto-memory. When session work produces one, record the promotion in the checkpoint ("promoted to <destination>: <name>") instead of duplicating its content in both places.
+- **Learnings stay in the journal until a promotion pass.** Everything the work teaches goes into an entry's Learnings, including what plainly outlives the effort: a tool's trap, an environment recipe, a correction from the user on how to work, a fact about the user. While the effort runs, auto-memory, the project's instruction file and skills receive nothing from it beyond the pointer line above. One effort's evidence is too thin to judge what generalizes, and learnings written straight to memory scatter into files no review ever reads together. This outranks the harness's own auto-memory instructions to save feedback and reference facts as they come up: during journal work, the Learnings entry is that save.
+- **The promotion pass runs at a retrospective.** When the project's instructions or kickoff skill define a retrospective, that retrospective runs it. Otherwise the close-out of merged, parked or superseded work does (section 8). The pass reads every Learnings entry written since the last pass, archives included. Entries written before the Learnings slot existed have none, so it reads their discoveries and working-style corrections, plus the Working Notes. Each learning gets one destination:
+  - **stays**: it mattered only to this effort
+  - **the skill that owns the behavior**: a run of that skill would have gone differently
+  - **the project's instruction file**: a standing rule on how to work that no single skill owns
+  - **auto-memory**: reference knowledge or a fact about the user that must be at hand at the start of any session
+
+  Put the list to the user with the drafted text for each promotion and write what the user approves. A learning already present at its destination is marked as present, never written twice. Record every verdict in a `#### Promotion pass` subsection of the current entry: "promoted to <destination>: <name>", "already in <destination>" or "stays".
+
+- **An explicit ask is written on the spot.** When the user says to remember something, or names memory, an instruction file or a skill as its home, write it there now and record the promotion in the checkpoint's Promotion pass.
 - **Name every memory write in the turn's final reply, with the file it went to.** Silent memory writes are how shadow copies form and persist unnoticed.
 
 An effort does not need a ticket to deserve a journal: skill-building, investigations, and migrations get one under the same root. Without a journal, an initiative's state has nowhere durable to live except memory — and the shadow-copy problem returns by structural necessity.
