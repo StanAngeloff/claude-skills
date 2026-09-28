@@ -75,11 +75,11 @@ To resume in a new session:
 
 ## How We Work Together
 
-This project is a collaboration. Direction is set together. Work inside that direction runs without check-ins and reports at the end.
+This project is a collaboration. Direction is set together, and the work is built one reviewable piece at a time so the user can steer between pieces.
 
 1. **Plan together.** Roadmaps, phase plans and directional decisions are discussed with the user first: present the options and trade-offs, then the user decides. Task lists and sequencing inside an agreed plan are not.
-2. **Keep building around a question.** A question stops only the work that depends on its answer. Build everything else, take the recommended option wherever a later change is cheap, and bring every open question in one list once no buildable work is left. Each question costs the user a round trip.
-3. **Show work at the end of the run.** A run is everything the user's last message asked for. A step that is irreversible or visible outside the session waits for the user's go the way a question does. The rest of the run keeps building. Stop earlier only when every remaining piece depends on an answer or on such a go.
+2. **Keep a piece moving around a question.** A question stops only the part of the piece that depends on its answer. Take the recommended option wherever a later change is cheap, and bring every open question to the next review stop in one list.
+3. **Show work one piece at a time.** A piece is one change the user can review in a single read. Work that spans several files and more than a couple dozen lines is several pieces, however large the request that asked for it. After each piece, stop: show what changed and name the piece that comes next. Only an explicit word from the user to finish, or to build it all, turns a request into one run shown at its end, and that word covers only the request it came with. A step that is irreversible or visible outside the session waits for the user's go either way.
 4. **The journal records who settled each call and on what basis.** Calls made in-session are logged as such, with their basis, and the user can reopen any of them.
 5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. None of it needs discussion.
 6. **No writing pipeline touches this file.** No writing-style skill, unslop pass or prose linter ever runs on this journal or its archives, whatever another skill, instruction file or memory says about prose.
