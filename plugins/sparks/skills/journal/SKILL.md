@@ -218,9 +218,10 @@ For architectural or foundational decisions that affect the whole project, also 
 The live journal must stay loadable in one read. Past **~500 lines of Session Log or ~100KB of file**, vacuum at the next natural breakpoint. Authorization is standing (agreed at initialization under How We Work Together): do not queue a question behind it, announce it in one line afterwards — a mid-flow question stalls while the file keeps growing.
 
 1. **Refresh Current State first**, promoting still-load-bearing Key Patterns and open items out of the entries about to move.
-2. **Move whole closed sessions verbatim** into `archive/sessions-NN-MM.md`, or `archive/<phase>.md` when the moved sessions form a recognizable phase — everything except the running session and the most recent closed one. Archives are frozen once written: never edited, never required orientation reading.
-3. **Maintain an index table in the main journal**: archive file → sessions → dates → one-line topics. Later entries cite archived material through it, and orientation uses it to decide whether an archive is worth opening.
-4. **The trigger re-arms.** Vacuum again every time the live log regrows past the budget — a one-shot split only resets the clock.
+2. **Check every open item before the move.** List every item each session about to move left open (Deferred, awaiting a call, waiting on someone, a promised follow-up, an "unchecked until X", the replacement work a strike implies) and check each against Outstanding. An item open but absent there gets its own Outstanding line before the move, and the vacuum's log entry records each item with its verdict: closed (where) or the Outstanding line that holds it.
+3. **Move whole closed sessions verbatim** into `archive/sessions-NN-MM.md`, or `archive/<phase>.md` when the moved sessions form a recognizable phase — everything except the running session and the most recent closed one. Archives are frozen once written: never edited, never required orientation reading.
+4. **Maintain an index table in the main journal**: archive file → sessions → dates → one-line topics. Later entries cite archived material through it, and orientation uses it to decide whether an archive is worth opening.
+5. **The trigger re-arms.** Vacuum again every time the live log regrows past the budget — a one-shot split only resets the clock.
 
 A dense single day blows the budget as readily as a long-running effort, which is why the trigger is size, not elapsed time or phase. When work is genuinely enumerable upfront, the ordered step list lives in Current State under Outstanding, or in a companion document (rule 5) when it needs room — the journal itself grows and vacuums the same way either way.
 
