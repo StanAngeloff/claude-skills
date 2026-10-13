@@ -81,7 +81,7 @@ This project is a collaboration. Direction is set together, and the work is buil
 2. **Keep a piece moving around a question.** A question stops only the part of the piece that depends on its answer. Take the recommended option wherever a later change is cheap, and bring every open question to the next review stop in one list.
 3. **Show work one piece at a time.** A piece is one change the user can review in a single read. Work that spans several files and more than a couple dozen lines is several pieces, however large the request that asked for it. After each piece, stop: show what changed and name the piece that comes next. Only an explicit word from the user to finish, or to build it all, turns a request into one run shown at its end, and that word covers only the request it came with. A step that is irreversible or visible outside the session waits for the user's go either way.
 4. **The journal records who settled each call and on what basis.** Calls made in-session are logged as such, with their basis, and the user can reopen any of them.
-5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. None of it needs discussion.
+5. **Journal upkeep is pre-authorized.** Refreshing Current State and vacuuming the log past its budget are standing maintenance: do them at natural breakpoints and announce them in one line afterwards. None of it needs discussion. A natural breakpoint leaves nothing waiting that can be built without a decision from the user: upkeep never fills a pause while such an item waits.
 6. **No writing pipeline touches this file.** No writing-style skill, unslop pass or prose linter ever runs on this journal or its archives, whatever another skill, instruction file or memory says about prose.
 
 ---
@@ -197,6 +197,8 @@ Write for a future reader with zero context.>
 
 **Before appending, read the log's tail.** If the last entry is one this session didn't write, or the Session/Checkpoint number is already taken, take the next free number and say so in the entry. Parallel sessions on one journal are normal; silent numbering collisions are not — a duplicate header costs a manual reconciliation entry later.
 
+**Land a delegate's findings in the entry that summarises it.** Findings a delegate addresses to the lead or to a later step go into the checkpoint that summarises the delegate, or they are lost. Pruning Outstanding closes an item only on the evidence its own text names, never on a subset of its scope.
+
 **Write the entry straight into the journal.** No writing-style, unslop or prose-lint pass runs on it, before or after the write, and no scratch draft is made to be linted first (rule 7).
 
 **Look each Learning up in the project's knowledge store, when it names one.** Some projects keep a store of facts shared across efforts, with commands to look a fact up, record that an effort ran into it and propose a new one. When the project's instructions name such a store, look each Learning up there as it goes into the entry: when the project's tooling runs the lookup in the same write, act on what it reports and do no second lookup by hand; otherwise run the lookup by hand before the write. A match is a lead: read the matching entry before judging it. A Learning that entry already holds is recorded there as seen by this effort, with the store's own command, and the Learning names the store's entry. A Learning the store lacks, or whose match holds a different fact, goes to the store as a proposal when it is the kind of fact the store holds and a later effort would otherwise work out again: other sessions see it at once, while it waits for acceptance. A fact that matters to this effort alone stays in the journal only, and a correction from the user on how to work waits for the promotion pass. Either way the Learning is written to the journal. Recording a sighting or a proposal promotes nothing: the promotion pass still decides every Learning's lasting home. A project without such a store skips this step, and so does a machine the named store is missing from, after saying so once.
@@ -212,12 +214,13 @@ When a decision is made during discussion:
 - Record it in the current checkpoint under "Decisions"
 - If an alternative was considered and rejected, note it: "Option B (rejected): ... — recording for future discussion"
 - If a decision contradicts or supersedes an earlier one, add a correction entry — do **not** edit the original
+- An idea the user parks in the journal for later is recorded as the user's idea and raised only when the work reaches it
 
 For architectural or foundational decisions that affect the whole project, also consider whether they belong in the "Founding Principles" section at the top.
 
 ### 5. Vacuum (pre-authorized size maintenance)
 
-The live journal must stay loadable in one read. Past **~500 lines of Session Log or ~100KB of file**, vacuum at the next natural breakpoint. Authorization is standing (agreed at initialization under How We Work Together): do not queue a question behind it, announce it in one line afterwards — a mid-flow question stalls while the file keeps growing.
+The live journal must stay loadable in one read. Past **~500 lines of Session Log or ~100KB of file**, vacuum at the next natural breakpoint, never while an item that needs no decision from the user is still left to build. Authorization is standing (agreed at initialization under How We Work Together): do not queue a question behind it, announce it in one line afterwards — a mid-flow question stalls while the file keeps growing.
 
 1. **Refresh Current State first**, promoting still-load-bearing Key Patterns and open items out of the entries about to move.
 2. **Check every open item before the move.** List every item each session about to move left open (Deferred, awaiting a call, waiting on someone, a promised follow-up, an "unchecked until X", the replacement work a strike implies) and check each against Outstanding. An item open but absent there gets its own Outstanding line before the move, and the vacuum's log entry records each item with its verdict: closed (where) or the Outstanding line that holds it.
