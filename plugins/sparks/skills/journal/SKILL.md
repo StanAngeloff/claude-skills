@@ -129,6 +129,8 @@ This project is a collaboration. Direction is set together, and the work is buil
 
 ### 2. Orient (journal exists, new session)
 
+**First, check where the session runs.** Compare the working directory, and the tools and MCP servers the session has, with what the journal's Session setup names for the work. On any mismatch, say so in the first message and stop: never work around it, because everything built from the wrong place has to be checked again from the right one.
+
 This is the most critical phase. Before writing any code:
 
 1. **Read the header and Current State first.** Use `grep '^## \|^### ' journal.md` to map the structure, then size the read to the file. Under ~400 lines, read the journal end-to-end — don't skip sections; a decision encoded in an earlier entry may still be load-bearing, and struck items tell you what was tried and abandoned. Past that size, the default orientation read is the header sections, Current State, and the most recent session's entries; open older entries, archives, or companions only where Current State, the task, or a "Read further" trigger points. A full read of everything is the deliberate exception — name its cost before starting one; on a long-lived journal it dominates the session's token budget and can exceed what a file-read tool returns at all. When the project's own instructions require a full read, that rule wins at every size. Read the whole file in order with no grep map and no tail-only read.
